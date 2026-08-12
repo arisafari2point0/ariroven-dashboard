@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ari Roven — Marketing Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<style>
+  :root { color-scheme: light; --bg:#f7f8fa; --card:#fff; --border:#e5e7eb; --text:#16181d; --text-muted:#6b7280;
+    --accent:#7c3aed; --accent-2:#059669; --accent-3:#2563eb; --danger:#dc2626; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px; }
+  .header { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+  .header h1 { font-size:22px; margin:0 0 4px 0; font-weight:700; }
+  .header .sub { color:var(--text-muted); font-size:13px; }
+  .badge { font-size:12px; color:var(--text-muted); background:var(--card); border:1px solid var(--border); padding:6px 12px; border-radius:999px; }
+  .kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+  @media (max-width:900px) { .kpi-grid { grid-template-columns:repeat(2,1fr); } }
+  .kpi { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
+  .kpi .label { font-size:12px; color:var(--text-muted); margin-bottom:6px; }
+  .kpi .value { font-size:22px; font-weight:700; }
+  .grid-2 { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:900px) { .grid-2 { grid-template-columns:1fr; } }
+  .panel { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+  .panel h2 { font-size:14px; margin:0 0 12px 0; font-weight:600; }
+  .chart-wrap { position:relative; height:260px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--border); }
+  th { color:var(--text-muted); font-weight:600; font-size:12px; }
+  td.num, th.num { text-align:right; }
+  .tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:999px; background:#ecfdf5; color:#059669; font-weight:600; }
+  .footer-note { color:var(--text-muted); font-size:12px; margin-top:20px; text-align:center; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>Ari Roven Store — Marketing Dashboard</h1>
+    <div class="sub">www.ariroven.com · USD · refreshed daily from Shopify</div>
+  </div>
+  <div class="badge" id="rangeLabel">Last 30 days · updated Aug 12, 2026</div>
+</div>
+
+<div class="kpi-grid">
+  <div class="kpi"><div class="label">Gross sales (30d)</div><div class="value">$2,861.56</div></div>
+  <div class="kpi"><div class="label">Orders (30d)</div><div class="value">99</div></div>
+  <div class="kpi"><div class="label">Avg order value</div><div class="value">$36.61</div></div>
+  <div class="kpi"><div class="label">Sessions (30d)</div><div class="value">1,569</div></div>
+  <div class="kpi"><div class="label">Conversion rate</div><div class="value">6.2%</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="panel">
+    <h2>Revenue trend (last 30 days)</h2>
+    <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <h2>Orders by channel</h2>
+    <div class="chart-wrap"><canvas id="channelChart"></canvas></div>
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="panel">
+    <h2>Top products by revenue</h2>
+    <table>
+      <thead><tr><th>Product</th><th class="num">Orders</th><th class="num">Gross</th><th class="num">Net</th></tr></thead>
+      <tbody>
+        <tr><td>Goodnight Joon</td><td class="num">239</td><td class="num">$5,377.31</td><td class="num">$4,943.77</td></tr>
+        <tr><td>Good Morning Joon</td><td class="num">76</td><td class="num">$1,619.19</td><td class="num">$1,321.38</td></tr>
+        <tr><td>Goodnight Joon Coloring Book</td><td class="num">13</td><td class="num">$194.87</td><td class="num">$96.91</td></tr>
+        <tr><td>Ev at the Bev</td><td class="num">9</td><td class="num">$161.91</td><td class="num">$41.31</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Traffic → checkout funnel</h2>
+    <div class="chart-wrap" style="height:200px;"><canvas id="funnelChart"></canvas></div>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Recent orders</h2>
+  <table>
+    <thead><tr><th>Order</th><th>Customer</th><th>Date</th><th>Status</th><th class="num">Total</th></tr></thead>
+    <tbody>
+      <tr><td>#1541</td><td>Ariana Kuhnsman</td><td>Aug 12</td><td><span class="tag">PAID</span></td><td class="num">$25.98</td></tr>
+      <tr><td>#1540</td><td>Kayvan Kone'</td><td>Aug 12</td><td><span class="tag">PAID</span></td><td class="num">$25.98</td></tr>
+      <tr><td>#1539</td><td>shideh Miller</td><td>Aug 12</td><td><span class="tag">PAID</span></td><td class="num">$27.93</td></tr>
+      <tr><td>#1538</td><td>Noelia Rios</td><td>Aug 12</td><td><span class="tag">PAID</span></td><td class="num">$25.98</td></tr>
+      <tr><td>#1537</td><td>David Lucas</td><td>Aug 11</td><td><span class="tag">PAID</span></td><td class="num">$40.98</td></tr>
+      <tr><td>#1536</td><td>Melody Avery</td><td>Aug 11</td><td><span class="tag">PAID</span></td><td class="num">$40.98</td></tr>
+      <tr><td>#1535</td><td>Samira Qawam</td><td>Aug 11</td><td><span class="tag">PAID</span></td><td class="num">$44.39</td></tr>
+      <tr><td>#1534</td><td>Anne Hayles</td><td>Aug 11</td><td><span class="tag">PAID</span></td><td class="num">$40.98</td></tr>
+      <tr><td>#1533</td><td>Lindsay Jessup</td><td>Aug 11</td><td><span class="tag">PAID</span></td><td class="num">$25.98</td></tr>
+      <tr><td>#1532</td><td>kevin Zarrin</td><td>Aug 10</td><td><span class="tag">PAID</span></td><td class="num">$25.98</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer-note">This page regenerates automatically each morning from live Shopify data.</div>
+
+<script>
+const days = ["07-13","07-14","07-15","07-16","07-17","07-18","07-19","07-20","07-21","07-22","07-23","07-24","07-25","07-26","07-27","07-28","07-29","07-30","07-31","08-01","08-02","08-03","08-04","08-05","08-06","08-07","08-08","08-09","08-10","08-11","08-12"];
+const gross = [0,159.92,99.95,19.99,97.95,99.95,119.94,79.96,94.95,199.9,39.98,0,99.95,259.87,39.98,139.93,0,79.96,54.97,19.99,234.88,139.93,99.95,179.91,39.98,19.99,79.96,59.97,99.95,159.92,39.98];
+const net = [0,149.94,89.97,19.99,87.97,94.96,104.97,74.97,89.96,174.95,39.98,0,89.97,184.93,39.98,129.95,0,74.97,49.98,19.99,219.91,109.96,94.96,154.96,39.98,19.99,69.98,49.99,94.96,144.95,39.98];
+
+new Chart(document.getElementById('revenueChart'), {
+  type: 'line',
+  data: { labels: days, datasets: [
+    { label: 'Gross sales', data: gross, borderColor: '#7c3aed', backgroundColor: 'rgba(124,58,237,0.08)', tension: 0.3, fill: true },
+    { label: 'Net sales', data: net, borderColor: '#059669', tension: 0.3, fill: false }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, font:{ size:11 } } } },
+    scales:{ y:{ ticks:{ callback:v=>'$'+v } }, x:{ ticks:{ maxTicksLimit:8 } } } }
+});
+
+new Chart(document.getElementById('channelChart'), {
+  type: 'bar',
+  data: { labels: ['Instagram','Direct/other','Facebook','ariroven','Shopify','Google'], datasets: [{ label:'Orders', data:[65,25,4,3,1,1], backgroundColor:'#2563eb' }] },
+  options: { responsive:true, maintainAspectRatio:false, indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ precision:0 } } } }
+});
+
+new Chart(document.getElementById('funnelChart'), {
+  type: 'bar',
+  data: { labels: ['Sessions','Added to cart','Reached checkout','Completed'], datasets:[{ data:[1569,151,76,97], backgroundColor:['#c4b5fd','#a78bfa','#8b5cf6','#7c3aed'] }] },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ ticks:{ precision:0 } } } }
+});
+</script>
+
+</body>
+</html>
